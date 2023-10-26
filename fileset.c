@@ -354,6 +354,8 @@ fileset_alloc_file(filesetentry_t *entry)
 		return (FILEBENCH_ERROR);
 	}
 	char magicStr[13] = "ABCDEFGHIJKL";
+	// permutations of this magic str appended at the beginning of each page
+	// 12! = 4.79X10^8, Page Size = 4K => This can uniquely identify pages ofupto ~1.78 TB file
 	for (seek = 0; seek < entry->fse_size;) {
 		off64_t wsize;
 		int ret = 0;
@@ -363,6 +365,7 @@ fileset_alloc_file(filesetentry_t *entry)
 		 * except on last write
 		 */
 		wsize = MIN(4096, MIN(entry->fse_size - seek, FILE_ALLOC_BLOCK));
+		if (wsize < 13) wsize = 13; // to accommodate magic str of len 12
 		// buf = (char *)malloc(wsize);
 		printf("%llu %llu %llu %llu %llu\n", wsize, sizeof(buf), FILE_ALLOC_BLOCK, entry->fse_size, seek);
 		memset(buf, ' ', wsize);
