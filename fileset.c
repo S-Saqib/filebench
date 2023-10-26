@@ -38,6 +38,7 @@
 #include "gamma_dist.h"
 #include "utils.h"
 #include "fsplug.h"
+#include "permutate.h"
 
 static int filecreate_done;
 
@@ -352,8 +353,8 @@ fileset_alloc_file(filesetentry_t *entry)
 		fileset_unbusy(entry, TRUE, FALSE, 0);
 		return (FILEBENCH_ERROR);
 	}
-
-	for (seek = 0; seek < entry->fse_size; ) {
+	char magicStr[13] = "ABCDEFGHIJKL";
+	for (seek = 0; seek < entry->fse_size;) {
 		off64_t wsize;
 		int ret = 0;
 
@@ -361,10 +362,12 @@ fileset_alloc_file(filesetentry_t *entry)
 		 * Write FILE_ALLOC_BLOCK's worth,
 		 * except on last write
 		 */
-		wsize = MIN(entry->fse_size - seek, FILE_ALLOC_BLOCK);
+		wsize = MIN(4096, MIN(entry->fse_size - seek, FILE_ALLOC_BLOCK));
 		// buf = (char *)malloc(wsize);
-		// printf("%llu %llu %llu\n", wsize, sizeof(buf), FILE_ALLOC_BLOCK);
-		memset(buf, '6', wsize);
+		printf("%llu %llu %llu %llu %llu\n", wsize, sizeof(buf), FILE_ALLOC_BLOCK, entry->fse_size, seek);
+		memset(buf, ' ', wsize);
+		memcpy(buf, magicStr, sizeof(magicStr));
+		nextPermutation(magicStr);
 		//printf("%s\n", buf);
 		ret = FB_WRITE(&fdesc, buf, wsize);
 		if (ret != wsize) {
