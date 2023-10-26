@@ -362,7 +362,10 @@ fileset_alloc_file(filesetentry_t *entry)
 		 * except on last write
 		 */
 		wsize = MIN(entry->fse_size - seek, FILE_ALLOC_BLOCK);
-
+		// buf = (char *)malloc(wsize);
+		// printf("%llu %llu %llu\n", wsize, sizeof(buf), FILE_ALLOC_BLOCK);
+		memset(buf, '6', wsize);
+		//printf("%s\n", buf);
 		ret = FB_WRITE(&fdesc, buf, wsize);
 		if (ret != wsize) {
 			filebench_log(LOG_ERROR,
